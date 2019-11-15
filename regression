@@ -1,0 +1,501 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# Seaborn
+# Create a file named 4.9_seaborn_exercises.py for this exercise.
+# Use the iris database to answer the following quesitons:
+
+# In[1]:
+
+
+get_ipython().run_line_magic('matplotlib', 'inline')
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sqlalchemy import create_engine
+import seaborn as sns
+from pydataset import data
+
+
+# In[2]:
+
+
+iris = sns.load_dataset('iris')
+
+iris.dtypes
+
+
+# In[3]:
+
+
+iris.shape
+
+
+# In[4]:
+
+
+data('iris', show_doc=True) # view the documentation for the dataset iris
+
+
+# 1. What does the distribution of petal lengths look like?
+
+# In[5]:
+
+
+iris.head(3)
+
+
+# In[ ]:
+
+
+sns.
+
+
+# In[6]:
+
+
+sns.distplot(iris.petal_length)
+
+
+# 2. Is there a correlation between petal length and petal width?
+
+# In[7]:
+
+
+iris.corr() # yes, 0.962865
+
+
+# In[8]:
+
+
+# Compute the correlation matrix
+corr = iris.corr()
+# Generate a mask for the upper triangle
+mask = np.zeros_like(corr, dtype=np.bool)
+mask[np.triu_indices_from(mask)] = True
+
+# Set up the matplotlib figure
+f, ax = plt.subplots(figsize=(11, 9))
+
+# Generate a custom diverging colormap
+cmap = sns.diverging_palette(220, 10, as_cmap=True)
+sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0, annot=True,
+            square=True, linewidths=.5, cbar_kws={"shrink": .5})
+
+
+# 3. Would it be reasonable to predict species based on sepal width and sepal length?
+
+# In[9]:
+
+
+# no, only -0.12
+
+# Compute the correlation matrix
+corr = iris.corr()
+
+# Generate a mask for the upper triangle
+mask = np.zeros_like(corr, dtype=np.bool)
+mask[np.triu_indices_from(mask)] = False
+
+# Set up the matplotlib figure
+f, ax = plt.subplots(figsize=(11, 9))
+
+# Generate a custom diverging colormap
+cmap = sns.diverging_palette(220, 10, as_cmap=True)
+sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0, annot=True,
+            square=True, linewidths=.5, cbar_kws={"shrink": .5})
+
+
+# 4. Which features would be best used to predict species?
+
+# In[10]:
+
+
+iris.corr() # answer is:
+# sepal_length with either petal_length or petal_width
+# and petal_length and petal_width
+# I'd go with petal_length and sepal_length based on the last set of graphs.
+
+
+# In[11]:
+
+
+sns.scatterplot(x="petal_length", y="sepal_length", data=iris, hue='species')
+
+
+# In[12]:
+
+
+sns.relplot(data=iris, x='petal_length', y='sepal_length', hue='species')
+
+
+# In[13]:
+
+
+sns.scatterplot(x="petal_width", y="sepal_length", data=iris, hue='species')
+
+
+# In[14]:
+
+
+sns.scatterplot(x="petal_length", y="petal_width", data=iris, hue='species')
+
+
+# In[15]:
+
+
+sns.pairplot(iris, hue="species", palette="husl")
+
+
+# 1. Using the lesson as an example, use seaborn's load_dataset function to load the anscombe data set. Use pandas to group the data by the dataset column, and calculate summary statistics for each dataset. What do you notice?
+
+# In[16]:
+
+
+anscombe = sns.load_dataset('anscombe')
+anscombe.head(3)
+
+
+# In[17]:
+
+
+anscombe.describe().transpose()
+
+
+# In[18]:
+
+
+anscombe[['dataset','x', 'y']].groupby('dataset').agg(['max', 'min', 'mean', 'std', 'median'])
+# datasets I-III have x-max=14, x-min=4, x-median=9
+# for all datasets, x-mean=9, x-std=3.3, y-mean=7.5, y-std=2
+
+
+# In[19]:
+
+
+anscombe[['dataset','x', 'y']].agg(['max', 'min', 'mean', 'std', 'median'])
+
+
+# * Plot the x and y values from the anscombe data. Each dataset should be in a separate column.
+
+# In[20]:
+
+
+sns.relplot(data=anscombe, x='x', y='y', col='dataset')
+
+
+# 2. Load the InsectSprays dataset and read it's documentation. Create a boxplot that shows the effectiveness of the different insect sprays.
+
+# In[21]:
+
+
+from pydataset import data
+
+
+# In[22]:
+
+
+InsectSprays = data('InsectSprays')
+InsectSprays.head(3)
+
+
+# In[23]:
+
+
+data('InsectSprays', show_doc=True) # view the documentation for the dataset InsectSprays
+
+
+# In[24]:
+
+
+InsectSprays[['spray','count']].groupby('spray').sum()
+
+
+# In[25]:
+
+
+sns.boxplot(x='count', y='spray', data=InsectSprays)
+
+
+# 3. Load the swiss dataset and read it's documentation. Create visualizations to answer the following questions:
+
+# In[26]:
+
+
+swiss = data('swiss')
+swiss.head(3)
+
+
+# In[27]:
+
+
+data('swiss', show_doc=True)
+
+
+# * Create a column named is_catholic that holds a boolean value of whether or not the province is Catholic. (Choose a cutoff point for what constitutes catholic)
+
+# In[28]:
+
+
+swiss.head(3)
+
+
+# In[29]:
+
+
+swiss['is_catholic'] = swiss['Catholic'] > 80.0
+swiss.head(3)
+
+
+# * Does whether or not a province is Catholic influence fertility?
+
+# In[30]:
+
+
+swiss.corr() # % of Catholics gives .46, but "is_catholic" gives .6... please discuss!
+
+
+# In[31]:
+
+
+index = swiss.index
+index
+
+
+# In[58]:
+
+
+sns.distplot(swiss.Catholic)
+
+
+# In[32]:
+
+
+sns.scatterplot(x="Fertility", y="Catholic", data=swiss) # no relationship
+
+
+# In[33]:
+
+
+sns.regplot(x="Fertility", y="Catholic", data=swiss)
+# This seems to show that the normal variation should be inside the shaded area if there is a relationship
+# so this "proves" there is no relationship
+
+
+# In[34]:
+
+
+# Compute the correlation matrix
+corr = swiss.corr()
+# Generate a mask for the upper triangle
+mask = np.zeros_like(corr, dtype=np.bool)
+mask[np.triu_indices_from(mask)] = True
+
+# Set up the matplotlib figure
+f, ax = plt.subplots(figsize=(11, 9))
+
+# Generate a custom diverging colormap
+cmap = sns.diverging_palette(220, 10, as_cmap=True)
+sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0, annot=True,
+            square=True, linewidths=.5, cbar_kws={"shrink": .5})
+
+
+# * What measure correlates most strongly with fertility?
+
+# In[35]:
+
+
+swiss.head(3)
+
+
+# In[36]:
+
+
+swiss.corr()
+
+
+# In[37]:
+
+
+sns.regplot(x="Education", y="Fertility", data=swiss) 
+# strongest relationship appears to be between Education and Fertility with an inverse relationship
+
+
+# 4. Using the chipotle dataset from the previous exercise, create a barplot that shows the 4 most popular items and the revenue produced by each.
+
+# In[38]:
+
+
+import pandas as pd
+import numpy as np
+get_ipython().run_line_magic('matplotlib', 'inline')
+import matplotlib.pyplot as plt
+from pydataset import data # data is a function that gives a dataframe
+from sqlalchemy import create_engine
+from env import user, host, pw
+
+
+# In[39]:
+
+
+def get_db_url(db, user, host, password):
+    from sqlalchemy import create_engine
+    url = f'mysql+pymysql://{user}:{password}@{host}/{db}'
+    return create_engine(url)
+
+conn = get_db_url('chipotle', user, host, pw)
+
+chipotle_df = pd.read_sql('select * from orders;', conn)
+
+chipotle_df['item_price'] = chipotle_df['item_price'].replace( '[\$,)]','', regex=True ).astype(float)
+
+chipotle_df.head(4)
+
+
+# In[40]:
+
+
+sns.barplot(x="quantity", y="item_name", data=chipotle_df)
+
+
+# In[41]:
+
+
+top_items_df = chipotle_df[['item_name','quantity']]            .groupby('item_name', as_index=False)            .sum()            .sort_values(by='quantity', ascending=False)            .head(4)
+top_items_df
+
+# my first erroneous attempt
+# top_items = pd.DataFrame(chipotle_df.groupby(['item_name'])['quantity']\
+#     .agg(['sum'])\
+#     .sort_values(by='sum', ascending=False).head(4))
+# top_items
+# top_items = chipotle_df [[chipotle_df in top_items]]
+
+
+# In[42]:
+
+
+sns.barplot(x="quantity", y="item_name", data=top_items_df)
+
+
+# 5. Load the sleepstudy data and read it's documentation. Use seaborn to create a line plot of all the individual subject's reaction times and a more prominant line showing the average change in reaction time.
+
+# In[43]:
+
+
+sleepstudy_df = data('sleepstudy')
+sleepstudy_df.head(3)
+
+
+# In[44]:
+
+
+sleepstudy_df.shape
+
+
+# In[45]:
+
+
+data('sleepstudy', show_doc=True)
+
+
+# Use seaborn to create a line plot of all the individual subject's reaction times and a more prominant line showing the average change in reaction time.
+
+# In[46]:
+
+
+sleepstudy_df.Reaction.plot()
+
+
+# In[47]:
+
+
+sns.lineplot(data=sleepstudy_df, y='Reaction', x='Days', linewidth=5, label='Average')
+
+
+# In[48]:
+
+
+sns.lineplot(data=sleepstudy_df, y='Reaction', x='Days', hue='Subject')
+
+
+# In[49]:
+
+
+sns.lineplot(data=sleepstudy_df, y='Reaction', x='Days', linewidth=5, label='Average')
+sns.lineplot(data=sleepstudy_df, y='Reaction', x='Days', hue='Subject')
+
+
+# In[50]:
+
+
+plt.figure(figsize=(12, 12))
+sns.lineplot(data=sleepstudy_df, y='Reaction', x='Days', linewidth=5, label='Average')
+sns.lineplot(data=sleepstudy_df, y='Reaction', x='Days', hue='Subject')
+
+
+# In[51]:
+
+
+plt.figure(figsize=(12, 12))
+
+# Why did this line split the subjects up so much more?
+sleepstudy_df.Subject = 'subject_' + sleepstudy_df.Subject.astype('str')
+
+sns.lineplot(data=sleepstudy_df, y='Reaction', x='Days', linewidth=5, label='Average')
+sns.lineplot(data=sleepstudy_df, y='Reaction', x='Days', hue='Subject')
+
+
+# In[52]:
+
+
+plt.figure(figsize=(20, 20))
+sns.relplot(x="Days", y="Reaction", hue="Subject", kind="line", data=sleepstudy_df);
+
+
+# In[53]:
+
+
+sns.pairplot(sleepstudy_df, hue='Days')
+
+
+# In[54]:
+
+
+#plt.setp(sleepstudy_df.get_xticklabels(), rotation=45)
+sns.relplot(data=sleepstudy_df, x='Subject', y='Reaction', hue='Days')
+
+
+# In[55]:
+
+
+diff = [[sleepstudy_df[['Subject','Reaction']].groupby('Subject').agg('max') - sleepstudy_df[['Subject','Reaction']].groupby('Subject').agg('min')]]
+
+
+# In[56]:
+
+
+diff
+
+
+# In[57]:
+
+
+# Zach's answer:
+plt.figure(figsize=(12, 12))
+
+sleep = data('sleepstudy')
+
+# Subject had contained numbers so Seaborn was treating it as a continuous variable.
+# This line makes seaborn treat Subject as a categorical variable rather than a continuous one
+sleep.Subject = 'subject_' + sleep.Subject.astype('str')
+
+sns.lineplot(data=sleep, y='Reaction', x='Days', linewidth=5, label='Average')
+sns.lineplot(data=sleep, y='Reaction', x='Days', hue='Subject')
+
+
+# In[ ]:
+
+
+
+
